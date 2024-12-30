@@ -1,0 +1,108 @@
+def occurs_check(var, term):
+    """
+    Check if a variable occurs in a term.
+    This is used in the occurs check during unification.
+    """
+    if var == term:
+        return True
+    if isinstance(term, list):
+        return any(occurs_check(var, t) for t in term)
+    return False
+
+
+def print_expr(term):
+    """
+    Print the term (expression) in a human-readable format.
+    This works for both predicates and simple variables.
+    """
+    if isinstance(term, str):  # A variable
+        return term
+    elif isinstance(term, tuple):  # A predicate
+        return f"{term[0]}({', '.join(map(print_expr, term[1:]))})"
+    return str(term)
+
+
+def unify(psi1, psi2, subst=None):
+    """
+    Function to unify two terms (psi1, psi2) with a given substitution (subst).
+    """
+    if subst is None:
+        subst = {}
+
+    # Step 1: If either term is a variable
+    print(f"Attempting to unify: {print_expr(psi1)} with {print_expr(psi2)}")
+
+    if isinstance(psi1, str):  # Psi1 is a variable
+        if psi1 in subst:  # Apply the current substitution
+            psi1 = subst[psi1]
+        if psi1 == psi2:  # Terms are identical
+            return subst
+        if occurs_check(psi1, psi2):  # Occurs check
+            print("Occurs check failure!")
+            return None  # Failure
+        print(f"Substituting {psi1} with {psi2}")
+        subst[psi1] = psi2
+        return subst
+
+    elif isinstance(psi2, str):  # Psi2 is a variable
+        if psi2 in subst:  # Apply the current substitution
+            psi2 = subst[psi2]
+        if psi1 == psi2:  # Terms are identical
+            return subst
+        if occurs_check(psi2, psi1):  # Occurs check
+            print("Occurs check failure!")
+            return None  # Failure
+        print(f"Substituting {psi2} with {psi1}")
+        subst[psi2] = psi1
+        return subst
+
+    # Step 2: If the initial predicate symbols are not the same, return failure
+    if isinstance(psi1, tuple) and isinstance(psi2, tuple):
+        if psi1[0] != psi2[0]:
+            print("Predicate symbols do not match!")
+            return None  # Failure
+
+        # Step 3: If they have different number of arguments, return failure
+        if len(psi1) != len(psi2):
+            print("Different number of arguments!")
+            return None  # Failure
+
+        # Step 4: Process arguments of the predicates
+        for i in range(1, len(psi1)):  # Start from 1 to skip predicate symbol
+            result = unify(psi1[i], psi2[i], subst)
+            if result is None:
+                print(f"Unification failed between {print_expr(psi1[i])} and {print_expr(psi2[i])}")
+                return None  # Failure
+            subst = result  # Update substitution
+
+    else:
+        # Step 5: Return failure if terms are not variables or predicates
+        print("Invalid terms!")
+        return None
+
+    # Step 6: Return the final substitution
+    print(f"Unification successful with substitution: {subst}")
+    return subst
+
+
+# Example usage with changed variables
+psi1 = ("h", "p", "q", "r", "s")  # A term like h(p, q(r))
+psi2 = ("h", "m", "q", "n", 'o')  # A term like h(m, q(n))
+
+subst = unify(psi1, psi2)
+if subst is None:
+    print("Unification failed!")
+else:
+    print("Unification succeeded with substitution:", subst)
+
+     
+Attempting to unify: h(p, q, r, s) with h(m, q, n, o)
+Attempting to unify: p with m
+Substituting p with m
+Attempting to unify: q with q
+Attempting to unify: r with n
+Substituting r with n
+Attempting to unify: s with o
+Substituting s with o
+Unification successful with substitution: {'p': 'm', 'r': 'n', 's': 'o'}
+Unification succeeded with substitution: {'p': 'm', 'r': 'n', 's': 'o'}
