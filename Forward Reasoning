@@ -1,0 +1,66 @@
+class Rule:
+    def __init__(self, conditions, conclusion):
+        self.conditions = conditions  # List of conditions (facts needed)
+        self.conclusion = conclusion  # Conclusion (new fact derived)
+
+    def is_applicable(self, facts):
+        # Check if all conditions are met (i.e., fact exists in the set of facts)
+        return all(condition in facts for condition in self.conditions)
+
+
+class ForwardChaining:
+    def __init__(self, facts, rules):
+        self.facts = set(facts)  # Initialize facts (known information)
+        self.rules = rules  # Initialize the rules (conditions -> conclusion)
+
+    def apply_rule(self, rule):
+        # Check if a rule can be applied and add the conclusion to facts
+        if rule.is_applicable(self.facts):
+            print(f"Applying rule: {rule.conditions} => {rule.conclusion}")
+            self.facts.add(rule.conclusion)
+
+    def run(self):
+        # Repeatedly apply rules as long as new facts are added
+        new_fact = True
+        while new_fact:
+            new_fact = False
+            for rule in self.rules:
+                if rule.is_applicable(self.facts) and rule.conclusion not in self.facts:
+                    self.apply_rule(rule)
+                    new_fact = True
+            if not new_fact:
+                print("No new facts can be derived.")
+            print("Current facts:", self.facts)
+
+
+# Define facts
+initial_facts = [
+    "Robert is American",         # Robert is American
+    "Nono is enemy of America",    # Nono is an enemy of America
+    "Missile is a weapon",        # A missile is a weapon
+    "Robert sold missiles to Nono",  # Robert sold missiles to Nono
+    "Nono has some missiles",      # Nono has missiles
+]
+
+# Define rules (if conditions are met, then conclude the new fact)
+rules = [
+    Rule(["Robert is American", "Nono is enemy of America", "Missile is a weapon", "Robert sold missiles to Nono"], "Robert is criminal"),
+]
+
+# Create the forward chaining engine
+engine = ForwardChaining(initial_facts, rules)
+
+# Run the forward chaining algorithm
+engine.run()
+
+# Check if the goal is achieved
+if "Robert is criminal" in engine.facts:
+    print("Goal reached: Robert is a criminal.")
+else:
+    print("Goal not reached.")
+     
+Applying rule: ['Robert is American', 'Nono is enemy of America', 'Missile is a weapon', 'Robert sold missiles to Nono'] => Robert is criminal
+Current facts: {'Robert sold missiles to Nono', 'Robert is criminal', 'Nono is enemy of America', 'Nono has some missiles', 'Robert is American', 'Missile is a weapon'}
+No new facts can be derived.
+Current facts: {'Robert sold missiles to Nono', 'Robert is criminal', 'Nono is enemy of America', 'Nono has some missiles', 'Robert is American', 'Missile is a weapon'}
+Goal reached: Robert is a criminal.
