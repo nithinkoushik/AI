@@ -1,0 +1,55 @@
+import random
+
+class Room:
+    def __init__(self):
+        self.state = 'dirty' if random.random() < 0.5 else 'clean'
+
+    def clean(self):
+        self.state = 'clean'
+
+class VacuumCleaner:
+    def __init__(self, grid_size):
+        self.grid_size = grid_size
+        self.environment = [[Room() for _ in range(grid_size)] for _ in range(grid_size)]
+        self.x, self.y = 0, 0  # Start position
+
+    def display_environment(self):
+        print("Current Environment:")
+        for row in self.environment:
+            print(" | ".join(room.state[0] for room in row))
+        print()
+
+    def move(self, direction):
+        if direction == 'up' and self.x > 0:
+            self.x -= 1
+        elif direction == 'down' and self.x < self.grid_size - 1:
+            self.x += 1
+        elif direction == 'left' and self.y > 0:
+            self.y -= 1
+        elif direction == 'right' and self.y < self.grid_size - 1:
+            self.y += 1
+
+    def clean_current_room(self):
+        if self.environment[self.x][self.y].state == 'dirty':
+            self.environment[self.x][self.y].clean()
+            print(f"Cleaned room at ({self.x}, {self.y})")
+
+    def is_all_clean(self):
+        return all(room.state == 'clean' for row in self.environment for room in row)
+
+    def run(self):
+        while not self.is_all_clean():
+            self.clean_current_room()
+            self.display_environment()
+
+            # Random move (up, down, left, right)
+            direction = random.choice(['up', 'down', 'left', 'right'])
+            self.move(direction)
+            print(f"Moved {direction} to ({self.x}, {self.y})")
+
+        print("All rooms are clean! Terminating.")
+
+if __name__ == "__main__":
+    grid_size = int(input("Enter the size of the grid (number of rooms per side): "))
+    vacuum_cleaner = VacuumCleaner(grid_size)
+    vacuum_cleaner.run()
