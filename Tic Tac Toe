@@ -1,0 +1,126 @@
+import numpy as np
+import random
+
+board = np.array([[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]])
+
+
+def check_win(b):
+    for i in range(3):
+        if (b[i, :] == 1).all() or (b[:, i] == 1).all():
+            return 1
+        if (b[i, :] == 0).all() or (b[:, i] == 0).all():
+            return 0
+    if (b[0, 0] == b[1, 1] == b[2, 2] == 1) or (b[0, 2] == b[1, 1] == b[2, 0] == 1):
+        return 1
+    if (b[0, 0] == b[1, 1] == b[2, 2] == 0) or (b[0, 2] == b[1, 1] == b[2, 0] == 0):
+        return 0
+    return -1
+
+def is_full(b):
+    return not (-1 in b)
+
+def print_board(b):
+    symbols = {1: 'X', 0: 'O', -1: ' '}
+    for row in b:
+        print(" | ".join(symbols[cell] for cell in row))
+        print("---------")
+
+def player_move():
+    while True:
+        row = int(input("Enter row (0, 1, or 2): "))
+        col = int(input("Enter column (0, 1, or 2): "))
+        if((row<=2 and row >=0)and(col<=2 and col >=0)):
+          if board[row, col] == -1:
+              board[row, col] = 1
+              break
+          else:
+              print("Cell is already occupied! Try again.")
+        else:
+          print("Invalid input,please try again")
+
+
+def machine_move():
+    empty_cells = [(r, c) for r in range(3) for c in range(3) if board[r, c] == -1]
+    if empty_cells:
+        row, col = random.choice(empty_cells)
+        board[row, col] = 0 # Machine uses 0 for 'O'
+        print(f"Machine placed O at ({row}, {col})")
+
+def play_game():
+    print("Welcome to Tic Tac Toe!")
+    print_board(board)
+
+    while True:
+        print("Player 1's turn (X)")
+        player_move()
+        print_board(board)
+
+        winner = check_win(board)
+        if winner != -1:
+            print(f"Player {winner} wins!")
+            break
+
+        if is_full(board):
+            print("It's a draw!")
+            break
+
+        print("Machine's turn (O)")
+        machine_move()
+        print_board(board)
+
+        winner = check_win(board)
+        if winner != -1:
+            print(f"Player {winner} wins!")
+            break
+
+        if is_full(board):
+            print("It's a draw!")
+            break
+
+play_game()
+     
+Welcome to Tic Tac Toe!
+  |   |  
+---------
+  |   |  
+---------
+  |   |  
+---------
+Player 1's turn (X)
+Enter row (0, 1, or 2): 1
+Enter column (0, 1, or 2): 2
+  |   |  
+---------
+  |   | X
+---------
+  |   |  
+---------
+Machine's turn (O)
+Machine placed O at (0, 1)
+  | O |  
+---------
+  |   | X
+---------
+  |   |  
+---------
+Player 1's turn (X)
+Enter row (0, 1, or 2): 0
+Enter column (0, 1, or 2): 1
+Cell is already occupied! Try again.
+Enter row (0, 1, or 2): 2
+Enter column (0, 1, or 2): 1
+  | O |  
+---------
+  |   | X
+---------
+  | X |  
+---------
+Machine's turn (O)
+Machine placed O at (2, 0)
+  | O |  
+---------
+  |   | X
+---------
+O | X |  
+---------
+Player 1's turn (X)
