@@ -1,0 +1,76 @@
+import random
+import math
+
+def initialize_board(n):
+
+    return [random.randint(0, n - 1) for _ in range(n)]
+
+def calculate_conflicts(board):
+
+    conflicts = 0
+    n = len(board)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if board[i] == board[j] or abs(board[i] - board[j]) == j - i:
+                conflicts += 1
+    return conflicts
+
+def simulated_annealing(n, max_iterations=10000, initial_temp=100, cooling_rate=0.99, log_interval=100):
+    b = initialize_board(n)
+    c = calculate_conflicts(b)
+    t = initial_temp
+    best_solution = b[:]
+    best_conflicts = c
+
+    for i in range(max_iterations):
+        if c == 0:
+            print(f"Solution found at iteration {i}!")
+            print("Best Board Position:", b)
+            return b
+
+        r = random.randint(0, n - 1)
+        new_c = random.randint(0, n - 1)
+        while new_c == b[r]:
+            new_c = random.randint(0, n - 1)
+
+        new_b = b[:]
+        new_b[r] = new_c
+        new_c_f = calculate_conflicts(new_b)
+
+        delta_c = new_c_f - c
+
+        if delta_c < 0 or math.exp(-delta_c / t) > random.random():
+            b, c = new_b, new_c_f
+            if c < best_conflicts:
+                best_solution, best_conflicts = b[:], c
+
+
+        if i % log_interval == 0 or i == max_iterations - 1:
+            print(f"Iteration {i}: Temperature={t:.2f}, Current Conflicts={c}, Best Conflicts={best_conflicts}")
+
+        t *= cooling_rate
+
+    print("No solution found within the maximum iterations.")
+    print("Best solution found:", best_solution)
+    return best_solution
+
+
+n = 8
+solution = simulated_annealing(n)
+if solution:
+    print("Final Solution:", solution)
+else:
+    print("No solution found within the maximum iterations.")
+
+     
+Iteration 0: Temperature=100.00, Current Conflicts=4, Best Conflicts=3
+Iteration 100: Temperature=36.60, Current Conflicts=5, Best Conflicts=1
+Iteration 200: Temperature=13.40, Current Conflicts=10, Best Conflicts=1
+Iteration 300: Temperature=4.90, Current Conflicts=8, Best Conflicts=1
+Iteration 400: Temperature=1.80, Current Conflicts=6, Best Conflicts=1
+Iteration 500: Temperature=0.66, Current Conflicts=3, Best Conflicts=1
+Iteration 600: Temperature=0.24, Current Conflicts=2, Best Conflicts=1
+Iteration 700: Temperature=0.09, Current Conflicts=2, Best Conflicts=1
+Solution found at iteration 761!
+Best Board Position: [3, 6, 4, 1, 5, 0, 2, 7]
+Final Solution: [3, 6, 4, 1, 5, 0, 2, 7]
